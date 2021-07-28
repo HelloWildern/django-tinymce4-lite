@@ -1,8 +1,6 @@
 (function($) {
   function tinymce4_init(selector) {
-    console.log(selector);
     var el = document.querySelector(selector);
-    console.log(el);
     var mce_conf = JSON.parse(el.dataset.mceConf);
 
     // There is no way to pass a JavaScript function as an option
@@ -38,12 +36,13 @@
       mce_conf['selector'] = selector;
     }
 
-    tinymce.init(tinymce_conf);
+    tinymce.init(mce_conf);
   } // End tinymce4_init
 
   $(function() {
     // initialize all tinymce editors on click instead of on load
-    $('.tinymce4-editor').on('click', function(elem){
+    $('.tinymce4-editor').on('click', function(){
+      var elem = $(this).get(0);
       tinymce4_init(elem.tagName + '#' + elem.id)
     })
 
