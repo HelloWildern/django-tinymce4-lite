@@ -1,6 +1,8 @@
 (function($) {
   function tinymce4_init(selector) {
+    console.log(selector);
     var el = document.querySelector(selector);
+    console.log(el);
     var mce_conf = JSON.parse(el.dataset.mceConf);
 
     // There is no way to pass a JavaScript function as an option
