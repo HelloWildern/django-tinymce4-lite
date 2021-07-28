@@ -180,21 +180,29 @@ class TinyMCE(Textarea):
         mce_config.update(self.mce_attrs)
         if 'language' not in mce_config:
             mce_config.update(get_language_config())
+
+        # add in callbacks
+        if mce_settings.USE_FILEBROWSER and 'file_browser_callback' not in mce_config:
+            mce_config['file_browser_callback'] = 'djangoFileBrowser'
+        if mce_settings.USE_SPELLCHECKER and 'spellchecker_callback' not in mce_config:
+            mce_config['spellchecker_callback'] = 'tinymce4_spellcheck'
+
+        final_attrs['data-mce-conf'] = json.dumps(mce_config)
         if mce_config.get('inline'):
             html = '<div{0}>{1}</div>\n'.format(flatatt(final_attrs), escape(value))
         else:
             html = '<textarea{0}>{1}</textarea>\n'.format(flatatt(final_attrs), escape(value))
-        html += '<script type="text/javascript">{0}</script>'.format(
-            jsmin(render_tinymce_init_js(mce_config,
-                                         mce_settings.CALLBACKS.copy(),
-                                         final_attrs['id'])
-                  )
-        )
+        # html += '<script type="text/javascript">{0}</script>'.format(
+        #     jsmin(render_tinymce_init_js(mce_config,
+        #                                  mce_settings.CALLBACKS.copy(),
+        #                                  final_attrs['id'])
+        #           )
+        # )
         return mark_safe(html)
 
     @property
     def media(self):
-        js = [mce_settings.JS_URL]
+        js = [mce_settings.JS_URL, reverse('tinymce-init')]
         if mce_settings.USE_FILEBROWSER:
             js.append(reverse('tinymce-filebrowser'))
         if mce_settings.ADDIONAL_JS_URLS:

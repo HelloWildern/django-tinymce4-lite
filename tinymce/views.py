@@ -10,13 +10,14 @@ from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.views.decorators.cache import never_cache
+from . import settings as mce_settings
 from jsmin import jsmin
 try:
     from enchant import checker, list_languages
 except ImportError:
     pass
 
-__all__ = ['spell_check', 'spell_check_callback', 'css', 'filebrowser']
+__all__ = ['spell_check', 'spell_check_callback', 'css', 'filebrowser', 'tinymce_init']
 
 logging.basicConfig(format='[%(asctime)s] %(module)s: %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -119,3 +120,13 @@ def filebrowser(request):
                                                context={'fb_url': fb_url},
                                                request=request)),
                         content_type='application/javascript; charset=utf-8')
+
+
+def tinymce_init(request):
+    """
+    Javascript for tinymce initialization
+    """
+    return HttpResponse(jsmin(render_to_string('tinymce/tinymce_init.js',
+        context={},
+        request=request)),
+        content_type='application/javascript; charset=utf-8')

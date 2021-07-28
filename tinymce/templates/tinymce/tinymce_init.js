@@ -1,33 +1,56 @@
 (function($) {
-  {% if is_admin_inline %}
-  $(function() {
-  {% endif %}
-    function tinymce4_init(selector) {
-      var tinymce4_config = {
-        {% for key, value in callbacks.items %}
-          '{{ key }}': {{ value|safe }},
-        {% endfor %}
-        setup: function (editor) {
-          editor.on('change', function () {
-            editor.save();
-          });
-        },
-        {{ tinymce_config|safe }}
-      };
-      if (typeof selector != 'undefined') {
-        tinymce4_config['selector'] = selector;
+  function tinymce4_init(selector) {
+    var mce_conf = JSON.parse($(selector).data('mce-conf'));
+
+    // There is no way to pass a JavaScript function as an option
+    // because all options are serialized as JSON.
+    const fns = [
+      'color_picker_callback',
+      'file_browser_callback',
+      'file_picker_callback',
+      'images_dataimg_filter',
+      'images_upload_handler',
+      'paste_postprocess',
+      'paste_preprocess',
+      'setup',
+      'urlconverter_callback',
+    ];
+    fns.forEach((fn_name) => {
+      if (typeof mce_conf[fn_name] != 'undefined') {
+        if (mce_conf[fn_name].includes('(')) {
+          mce_conf[fn_name] = eval('(' + mce_conf[fn_name] + ')');
+        }
+        else {
+          mce_conf[fn_name] = window[mce_conf[fn_name]];
+        }
       }
-      tinymce.init(tinymce4_config);
-    } // End tinymce4_init
-{% if not is_admin_inline %}
-    tinymce4_init();
-})();
-{% else %}
+    });
+    
+    mce_conf['setup'] = function (editor) {
+        editor.on('change', function () {
+          editor.save();
+        });
+    }
+    if (typeof selector != 'undefined') {
+      mce_conf['selector'] = selector;
+    }
+
+    tinymce.init(tinymce_conf);
+  } // End tinymce4_init
+
+  $(function() {
+    // initialize all tinymce editors on click instead of on load
+    $('.tinymce4-editor').on('click', function(elem){
+      tinymce4_init(elem.tagName + '#' + elem.id)
+    })
+
     // Add TinyMCE 4 widgets to textaras inside a node
     function add_editors(node) {
       $(node).find('.tinymce4-editor').each(function(i, elem) {
         if ($(elem).css('display') != 'none' && elem.id.indexOf('__prefix__') == -1) {
-          tinymce4_init(elem.tagName + '#' + elem.id);
+          $(elem).on('click', function(){
+            tinymce4_init(this.tagName + '#' + this.id);
+          });
         }
       });
     }
@@ -79,4 +102,3 @@
     });
   }); // End document.ready
 })(django.jQuery);
-{% endif %}
