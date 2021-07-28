@@ -202,7 +202,7 @@ class TinyMCE(Textarea):
 
     @property
     def media(self):
-        js = [mce_settings.JS_URL, reverse('tinymce-init')]
+        js = [mce_settings.JS_URL]
         if mce_settings.USE_FILEBROWSER:
             js.append(reverse('tinymce-filebrowser'))
         if mce_settings.ADDIONAL_JS_URLS:
@@ -212,6 +212,7 @@ class TinyMCE(Textarea):
         css = {'all': [reverse('tinymce-css')]}
         if mce_settings.CSS_URL:
             css['all'].append(mce_settings.CSS_URL)
+        js.append(reverse('tinymce-init'))
         return Media(js=js, css=css)
 
 
